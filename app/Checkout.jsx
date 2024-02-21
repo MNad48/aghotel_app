@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,15 @@ import {
   TextInput,
   StyleSheet,
   FlatList,
-  ScrollView,
+  Keyboard,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { UserContext, APIAddressContext } from '../App';
+import {Picker} from '@react-native-picker/picker';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {APIAddressContext} from '../App';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
-
-const Checkout = ({ route }) => {
-  const { id, cart } = route.params;
+import {useNavigation} from '@react-navigation/native';
+const Checkout = ({route}) => {
+  const {id, cart, clear} = route.params;
   const navigation = useNavigation();
   const [perHeads, setPerHeads] = useState('0');
   const [totalPerHeads, setTotalPerHeads] = useState('0');
@@ -23,20 +22,15 @@ const Checkout = ({ route }) => {
   const [orderItems, setOrderItems] = useState([]);
   const [tables, setTables] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
-  const { apiAddress, perHead } = useContext(APIAddressContext);
-  const { user_id } = useContext(UserContext);
-
+  const {apiAddress, perHead} = useContext(APIAddressContext);
   const generateRandomId = (numAlphabets, numNumbers) => {
     const alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numbers = '0123456789';
-
     let randomId = '';
-
     for (let i = 0; i < numAlphabets; i++) {
       const randomAlphabetIndex = Math.floor(Math.random() * alphabets.length);
       randomId += alphabets[randomAlphabetIndex];
     }
-
     for (let i = 0; i < numNumbers; i++) {
       const randomNumberIndex = Math.floor(Math.random() * numbers.length);
       randomId += numbers[randomNumberIndex];
@@ -45,17 +39,17 @@ const Checkout = ({ route }) => {
     return randomId;
   };
 
-  const calculateTotalPrice = (orderItems) => {
+  const calculateTotalPrice = orderItems => {
     return orderItems.reduce(
       (accumulator, item) => accumulator + item.quantity * item.food_price,
-      0
+      0,
     );
   };
 
   const handleCheckout = async () => {
     try {
       const order_id = id;
-      const OrderItems = cart.map((item) => ({
+      const OrderItems = cart.map(item => ({
         order_item_id: generateRandomId(1, 3),
         food_id: item.id,
         food_name: item.food_name,
@@ -70,7 +64,7 @@ const Checkout = ({ route }) => {
       const order = {
         order_id: order_id,
         order_date: order_date,
-        auth_id: user_id,
+        auth_id: null,
         table_id: selectedTable,
         per_heads: perHeads,
         total_phead: totalPerHeads,
@@ -89,6 +83,7 @@ const Checkout = ({ route }) => {
       const response = await axios.post(apiAddress + '/placeOrder', orders);
       if (response.data.status === '200') {
         navigation.goBack();
+        clear();
       }
     } catch (error) {
       console.error('Error in saveOrder:', error);
@@ -113,7 +108,7 @@ const Checkout = ({ route }) => {
     handleCheckout();
   }, [totalPerHeads, selectedTable]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({item}) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemName}>{item.food_name}</Text>
       <Text style={styles.itemPrice}>Subtotal: {item.sub_total} RS</Text>
@@ -122,59 +117,67 @@ const Checkout = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
-        <View style={styles.container}>
-          <Text style={styles.heading}>Per Heads</Text>
-          <TextInput
-            inputMode="numeric"
-            style={styles.input}
-            placeholder="Enter No. Of Heads"
-            value={perHeads}
-            onChangeText={(text) => {
-              setPerHeads(text);
-              setTotalPerHeads(parseInt(text) * perHead);
-            }}
-          />
-        </View>
-
-        <View style={styles.container}>
-          <Text style={styles.label}>Select Table:</Text>
-          <Picker
-            selectedValue={selectedTable}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedTable(itemValue)
-            }
-            style={styles.picker}
-          >
-            <Picker.Item label="Select a table" value={null} />
-            {tables &&
-              tables.map((table) => (
-                <Picker.Item
-                  key={table.table_id}
-                  label={table.table_name}
-                  value={table.table_id}
-                />
-              ))}
-          </Picker>
-        </View>
-        <View style={styles.orderContainer}>
-          <Text style={styles.orderNumber}>Order# {orders.order_id}</Text>
-          <Text style={styles.orderDetails}>Order Details</Text>
-          <FlatList
-            data={orderItems}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.food_id.toString()}
-          />
-          <Text style={styles.grandTotal}>
-            Sub Total: {orders.total_amount - totalPerHeads}
-          </Text>
-          <Text style={styles.grandTotal}>Per Heads: {totalPerHeads}</Text>
-          <Text style={styles.grandTotal}>
-            Grand Total: {orders.total_amount} RS
-          </Text>
-        </View>
-        <Button title="Checkout" onPress={saveOrder} style={styles.button} />
-      </ScrollView>
+      <View style={styles.orderContainer}>
+        <Text style={styles.heading}>Per Heads</Text>
+        <TextInput
+          inputMode="numeric"
+          style={styles.input}
+          placeholder="Enter No. Of Heads"
+          value={perHeads}
+          onChangeText={text => {
+            setPerHeads(text);
+            setTotalPerHeads(parseInt(text) * perHead);
+          }}
+          onBlur={() => {
+            Keyboard.dismiss();
+          }}
+        />
+        <Text style={styles.label}>Select Table:</Text>
+        <Picker
+          selectedValue={selectedTable}
+          onValueChange={(itemValue, itemIndex) => setSelectedTable(itemValue)}
+          style={styles.picker}>
+          <Picker.Item label="Select a table" value={null} />
+          {tables &&
+            tables.map(table => (
+              <Picker.Item
+                key={table.table_id}
+                label={table.table_name}
+                value={table.table_id}
+              />
+            ))}
+        </Picker>
+      </View>
+      <FlatList
+        ListHeaderComponent={() => (
+          <View>
+            <Text style={styles.orderNumber}>Order# {orders.order_id}</Text>
+            <Text style={styles.grandTotal}>
+              Sub Total: {orders.total_amount - totalPerHeads}
+            </Text>
+            <Text style={styles.grandTotal}>Per Heads: {totalPerHeads}</Text>
+            <Text style={styles.grandTotal}>
+              Grand Total: {orders.total_amount} RS
+            </Text>
+            <View style={{alignContent: 'center'}}>
+              <Text style={styles.orderDetails}>Order Details</Text>
+            </View>
+          </View>
+        )}
+        style={styles.container}
+        data={orderItems}
+        renderItem={renderItem}
+        keyExtractor={item => item.food_id.toString()}
+        ListFooterComponent={() => (
+          <View style={{alignContent: 'center', margin: 20}}>
+            <Button
+              title="Checkout"
+              onPress={saveOrder}
+              style={styles.button}
+            />
+          </View>
+        )}
+      />
     </SafeAreaView>
   );
 };
@@ -185,7 +188,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   container: {
-    margin: 20,
+    marginLeft: 10,
+    paddingBottom: 10,
   },
   heading: {
     color: '#000',
@@ -239,10 +243,8 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 8,
+    borderRadius: 20,
     alignItems: 'center',
-    margin: 20,
   },
 });
 export default Checkout;

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext, useCallback} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
-  Alert,
-  Keyboard
+  Keyboard,
+  ToastAndroid
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {APIAddressContext} from '../App';
+import { BackHandler } from 'react-native';
 const Main = ({navigation}) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,6 +26,10 @@ const Main = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
   const {apiAddress} = useContext(APIAddressContext);
   useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress',()=> {
+      BackHandler.exitApp();
+      return true;
+    });
     const fetchData = async () => {
       try {
         const response = await axios.get(apiAddress);
@@ -39,6 +44,7 @@ const Main = ({navigation}) => {
     };
 
     fetchData();
+    return ()=>backHandler.remove();
   }, [refreshing]);
   const filterData = text => {
     setSearchString(text);
@@ -58,7 +64,6 @@ const Main = ({navigation}) => {
 
     // Check if the item is already in the cart
     const isInCart = cart.some(cartItem => cartItem.id === item.id);
-
     if (isInCart) {
       // If the item is already in the cart, remove it
       const updatedCart = cart.filter(cartItem => cartItem.id !== item.id);
@@ -75,7 +80,7 @@ const Main = ({navigation}) => {
 
   const clearCart = () => {
     setCart([]);
-    Alert.alert('Cart Cleared', 'Your cart has been cleared successfully.');
+    ToastAndroid.show('Cart Cleared',ToastAndroid.SHORT);
   };
   const generateRandomId = (numAlphabets, numNumbers) => {
     const alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -121,10 +126,13 @@ const Main = ({navigation}) => {
     </View>
   );
   const openCheckout = () => {
-    navigation.navigate('checkout', {
-      id: generateRandomId(2, 13),
-      cart: cart
-    });
+    if(cart.length>0) {
+      navigation.navigate('checkout', {
+        id: generateRandomId(2, 13),
+        cart: cart,
+        clear: clearCart
+      });
+    }
   };
   const handleAddToCart = quantity => {
     if (quantity) {

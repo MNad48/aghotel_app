@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity,BackHandler } from 'react-native';
+import { View, TouchableOpacity,BackHandler, ToastAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation,useRoute } from '@react-navigation/native';
 const SettingButton = () => {
@@ -9,13 +9,12 @@ const SettingButton = () => {
       navigation.navigate('settings');
     };
     const handleBackPress = ()=>{
-      if(route.name==='login') {
+      if(route.name==='main') {
         BackHandler.exitApp();
       } else {
         navigation.goBack();
       }
     }
-  
     return (
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 16 }}>
         {/* Your App Name */}

@@ -11,16 +11,16 @@ import SettingButton from './app/SettingButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const Stack = createStackNavigator();
 // Create separate contexts for user and API address
-export const UserContext = createContext();
 export const APIAddressContext = createContext();
 const App = () => {
-  const [user_id, setUserId] = useState(null);
   const [apiAddress, setApiAddress] = useState(null);
   const [perHead, setPerHead] = useState(null);
-  // Function to set the user_id when login is successful
-  const onLoginSuccess = (userId) => {
-    setUserId(userId);
-  };
+  const onAPIAddressChanged = (address) => {
+    setApiAddress(address);
+  }
+  const onPHeadChanged = (head) => {
+    setPerHead(head);
+  } 
   const getApiAddress = async () => {
     try {
       const address = await AsyncStorage.getItem('apiAddress');
@@ -36,19 +36,16 @@ const App = () => {
     getApiAddress();
   }, []);
   return (
-    <UserContext.Provider value={{ user_id, onLoginSuccess }}>
-      <APIAddressContext.Provider value={{ apiAddress,perHead,setApiAddress,setPerHead }}>
+      <APIAddressContext.Provider value={{ apiAddress,perHead,onAPIAddressChanged,onPHeadChanged }}>
         <NavigationContainer style={{ flex: 1, alignItems: 'center', justifyContent: 'center', width: '80%' }}>
           <Stack.Navigator>
             <Stack.Screen name="startup" component={Startup} options={{ headerShown: false }} />
-            <Stack.Screen name="login" component={Login} options={{ header: () => <SettingButton /> }} />
-            <Stack.Screen name="main" component={Main} options={{ title: 'Order Food', header: () => <SettingButton />, headerLeft: null }} />
+            <Stack.Screen name="main" component={Main} options={{ title: 'Order Food', header: () => <SettingButton />}} />
             <Stack.Screen name='checkout' component={Checkout} options={{ title: 'Checkout', header: () => <SettingButton /> }} />
             <Stack.Screen name='settings' component={Settings} options={{ title: 'Settings' }} />
           </Stack.Navigator>
         </NavigationContainer>
       </APIAddressContext.Provider>
-    </UserContext.Provider>
   );
 };
 export default App;

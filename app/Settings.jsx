@@ -5,17 +5,16 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Keyboard
+  Keyboard,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { APIAddressContext } from '../App'; // Adjust the path based on your project structure
+import {APIAddressContext} from '../App'; // Adjust the path based on your project structure
 const Settings = ({navigation}) => {
   const [settingsApiAddress, setSettingsApiAddress] = useState('');
   const [perHeadCharges, setPerHeadCharges] = useState('');
-  
-  const {setApiAddress,setPerHead} = useContext(APIAddressContext);
+  const {onAPIAddressChanged, onPHeadChanged} = useContext(APIAddressContext);
   useEffect(() => {
     // Load values from AsyncStorage when the component is initially loaded
     const loadSettings = async () => {
@@ -24,7 +23,6 @@ const Settings = ({navigation}) => {
         const savedPerHeadCharges = await AsyncStorage.getItem(
           'perHeadCharges',
         );
-
         if (savedApiAddress !== null) {
           setSettingsApiAddress(savedApiAddress);
         }
@@ -40,18 +38,17 @@ const Settings = ({navigation}) => {
     loadSettings();
   }, []); // Empty dependency array ensures that this effect runs once when the component mounts
 
-    const saveSettings = async () => {
+  const saveSettings = async () => {
     try {
       await AsyncStorage.setItem('apiAddress', settingsApiAddress);
       await AsyncStorage.setItem('perHeadCharges', perHeadCharges);
-      setApiAddress(setSettingsApiAddress);
-      setPerHead(perHeadCharges);
+      onAPIAddressChanged(settingsApiAddress);
+      onPHeadChanged(perHeadCharges);
       navigation.goBack();
     } catch (error) {
       console.error('Error saving settings:', error);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.section}>
@@ -62,7 +59,7 @@ const Settings = ({navigation}) => {
           placeholder="Enter API Address"
           value={settingsApiAddress}
           onChangeText={text => setSettingsApiAddress(text)}
-          onBlur={()=>Keyboard.dismiss()}
+          onBlur={() => Keyboard.dismiss()}
         />
       </View>
       <View style={styles.section}>
@@ -73,7 +70,7 @@ const Settings = ({navigation}) => {
           placeholder="Enter Per Head Charges"
           value={perHeadCharges}
           onChangeText={text => setPerHeadCharges(text)}
-          onBlur={()=>Keyboard.dismiss()}
+          onBlur={() => Keyboard.dismiss()}
         />
       </View>
       <TouchableOpacity style={styles.saveBtn} onPress={saveSettings}>

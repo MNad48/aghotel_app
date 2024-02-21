@@ -1,8 +1,7 @@
 import React, {useContext, useState, useEffect} from 'react';
 import {View, TextInput, Button, Alert, Keyboard, ToastAndroid} from 'react-native';
-import {UserContext} from '../App'; // Adjust the path based on your project structure
+import {APIAddressContext,UserContext} from '../App'; // Adjust the path based on your project structure
 import axios from 'axios';
-import {APIAddressContext} from '../App';
 const Login = ({navigation}) => {
   const {onLoginSuccess} = useContext(UserContext);
   const [username, setUsername] = useState('');
@@ -26,6 +25,7 @@ const Login = ({navigation}) => {
         }
       })
       .catch(error => {
+        console.log(apiAddress);
         if(error.response) {
           ToastAndroid.show("Some unhandled error recieved",ToastAndroid.SHORT);
         } else if(error.request) {
