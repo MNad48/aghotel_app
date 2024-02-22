@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,47 +7,25 @@ import {
   TouchableOpacity,
   Keyboard,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {APIAddressContext} from '../App'; // Adjust the path based on your project structure
+import {useSelector,useDispatch} from 'react-redux';
+import { saveSettings } from './lib/settingSlice';
 const Settings = ({navigation}) => {
   const [settingsApiAddress, setSettingsApiAddress] = useState('');
   const [perHeadCharges, setPerHeadCharges] = useState('');
-  const {onAPIAddressChanged, onPHeadChanged} = useContext(APIAddressContext);
+  const apiAddress = useSelector(state=>state.settings.apiAddress);
+  const perHead = useSelector(state=>state.settings.perHead);
+  const dispatch = useDispatch();
   useEffect(() => {
-    // Load values from AsyncStorage when the component is initially loaded
-    const loadSettings = async () => {
-      try {
-        const savedApiAddress = await AsyncStorage.getItem('apiAddress');
-        const savedPerHeadCharges = await AsyncStorage.getItem(
-          'perHeadCharges',
-        );
-        if (savedApiAddress !== null) {
-          setSettingsApiAddress(savedApiAddress);
-        }
+    setSettingsApiAddress(apiAddress);
+    setPerHeadCharges(perHead.toString());
+  }, [apiAddress,perHead]); // Empty dependency array ensures that this effect runs once when the component mounts
 
-        if (savedPerHeadCharges !== null) {
-          setPerHeadCharges(savedPerHeadCharges);
-        }
-      } catch (error) {
-        console.error('Error loading settings:', error);
-      }
-    };
-
-    loadSettings();
-  }, []); // Empty dependency array ensures that this effect runs once when the component mounts
-
-  const saveSettings = async () => {
-    try {
-      await AsyncStorage.setItem('apiAddress', settingsApiAddress);
-      await AsyncStorage.setItem('perHeadCharges', perHeadCharges);
-      onAPIAddressChanged(settingsApiAddress);
-      onPHeadChanged(perHeadCharges);
-      navigation.goBack();
-    } catch (error) {
-      console.error('Error saving settings:', error);
-    }
+  const save = () => {
+    console.log(settingsApiAddress,perHeadCharges);
+    dispatch(saveSettings({apiAddress:settingsApiAddress,perHead:perHeadCharges}));
+    navigation.goBack();
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -73,7 +51,7 @@ const Settings = ({navigation}) => {
           onBlur={() => Keyboard.dismiss()}
         />
       </View>
-      <TouchableOpacity style={styles.saveBtn} onPress={saveSettings}>
+      <TouchableOpacity style={styles.saveBtn} onPress={save}>
         <Icon name="save" size={24} color="#fff" />
         <Text style={styles.saveBtnText}>Save</Text>
       </TouchableOpacity>

@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   Modal,
   Keyboard,
-  ToastAndroid
+  ToastAndroid,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {APIAddressContext} from '../App';
-import { BackHandler } from 'react-native';
+import {BackHandler} from 'react-native';
+import {useSelector} from 'react-redux';
 const Main = ({navigation}) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,13 +23,15 @@ const Main = ({navigation}) => {
   const [cart, setCart] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const {apiAddress} = useContext(APIAddressContext);
+  const apiAddress = useSelector(state => state.settings.apiAddress);
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress',()=> {
-      BackHandler.exitApp();
-      return true;
-    });
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        BackHandler.exitApp();
+        return true;
+      },
+    );
     const fetchData = async () => {
       try {
         const response = await axios.get(apiAddress);
@@ -44,8 +46,8 @@ const Main = ({navigation}) => {
     };
 
     fetchData();
-    return ()=>backHandler.remove();
-  }, [refreshing]);
+    return () => backHandler.remove();
+  }, [loading, apiAddress]);
   const filterData = text => {
     setSearchString(text);
     if (text === '') {
@@ -80,7 +82,7 @@ const Main = ({navigation}) => {
 
   const clearCart = () => {
     setCart([]);
-    ToastAndroid.show('Cart Cleared',ToastAndroid.SHORT);
+    ToastAndroid.show('Cart Cleared', ToastAndroid.SHORT);
   };
   const generateRandomId = (numAlphabets, numNumbers) => {
     const alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -126,11 +128,11 @@ const Main = ({navigation}) => {
     </View>
   );
   const openCheckout = () => {
-    if(cart.length>0) {
+    if (cart.length > 0) {
       navigation.navigate('checkout', {
         id: generateRandomId(2, 13),
         cart: cart,
-        clear: clearCart
+        clear: clearCart,
       });
     }
   };
@@ -143,7 +145,7 @@ const Main = ({navigation}) => {
     }
   };
   const handleRefresh = () => {
-    setRefreshing(true);
+    setLoading(true);
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -157,7 +159,7 @@ const Main = ({navigation}) => {
             style={styles.input}
             value={searchString}
             onChangeText={text => filterData(text)}
-            onBlur={()=>Keyboard.dismiss()}
+            onBlur={() => Keyboard.dismiss()}
           />
           <FlatList
             data={filteredData}

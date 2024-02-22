@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {APIAddressContext} from '../App';
+import {useSelector} from 'react-redux';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
 const Checkout = ({route}) => {
@@ -22,7 +22,8 @@ const Checkout = ({route}) => {
   const [orderItems, setOrderItems] = useState([]);
   const [tables, setTables] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
-  const {apiAddress, perHead} = useContext(APIAddressContext);
+  const apiAddress = useSelector(state=>state.settings.apiAddress);
+  const perHead = useSelector(state=>state.settings.perHead);
   const generateRandomId = (numAlphabets, numNumbers) => {
     const alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numbers = '0123456789';
@@ -66,7 +67,7 @@ const Checkout = ({route}) => {
         order_date: order_date,
         auth_id: null,
         table_id: selectedTable,
-        per_heads: perHeads,
+        per_heads: perHead,
         total_phead: totalPerHeads,
         order_status: 'Pending',
         items: OrderItems,
@@ -106,15 +107,15 @@ const Checkout = ({route}) => {
   useEffect(() => {
     LoadTables();
     handleCheckout();
-  }, [totalPerHeads, selectedTable]);
+  }, [totalPerHeads, selectedTable,perHead]);
 
   const renderItem = ({item}) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.itemName}>{item.food_name}</Text>
+      <Text style={styles.itemName}>{item.quantity}-{item.food_name} @{item.sub_total/item.quantity}</Text>
+      <Text style={styles.itemName}></Text>
       <Text style={styles.itemPrice}>Subtotal: {item.sub_total} RS</Text>
     </View>
   );
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.orderContainer}>

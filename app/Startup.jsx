@@ -15,7 +15,7 @@ const Startup = ({navigation}) => {
   useEffect(() => {
     Animated.timing(opacity, {
       toValue: 1,
-      duration: 4000,
+      duration: 5000,
       useNativeDriver: true,
     }).start(async () => {
       // Navigate to the main screen or login screen based on condition
