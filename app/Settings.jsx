@@ -23,7 +23,6 @@ const Settings = ({navigation}) => {
   }, [apiAddress,perHead]); // Empty dependency array ensures that this effect runs once when the component mounts
 
   const save = () => {
-    console.log(settingsApiAddress,perHeadCharges);
     dispatch(saveSettings({apiAddress:settingsApiAddress,perHead:perHeadCharges}));
     navigation.goBack();
   };

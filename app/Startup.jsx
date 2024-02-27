@@ -1,40 +1,26 @@
-// Startup.js
-import React, {useEffect, useContext} from 'react';
-import {Animated, StyleSheet, ImageBackground} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {APIAddressContext} from '../App';
-const Startup = ({navigation}) => {
-  const opacity = new Animated.Value(0);
-  const {onAPIAddressChanged} = useContext(APIAddressContext);
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Image } from 'react-native';
 
-  const apiAddress = async () => {
-    const address = await AsyncStorage.getItem('apiAddress');
-    return address;
-  };
+const Startup = ({ navigation }) => {
   useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 5000,
-      useNativeDriver: true,
-    }).start(async () => {
-      // Navigate to the main screen or login screen based on condition
-      const address = await apiAddress();
-      onAPIAddressChanged(address);
-      navigation.navigate('main');
-    });
-  }, [opacity, navigation]);
+    const timer = setTimeout(() => {
+      // Navigate to the 'Main' screen after 3 seconds
+      navigation.replace('main');
+    }, 3000); // Adjust the delay time as needed
+    // Clean up the timer
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Animated.View style={{opacity}}>
-        <ImageBackground
-          source={require('./res/aghotel.png')}
-          style={styles.bgImage}
-        />
-      </Animated.View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Image
+        source={require('./res/aghotel.png')}
+        style={styles.bgImage}
+      />
+    </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -48,7 +34,8 @@ const styles = StyleSheet.create({
   },
   bgImage: {
     flex: 1,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
   },
 });
+
 export default Startup;

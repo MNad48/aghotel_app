@@ -7,39 +7,16 @@ import Main from './app/Main';
 import Checkout from './app/Checkout';
 import Settings from './app/Settings';
 import SettingButton from './app/SettingButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 const Stack = createStackNavigator();
 import {Provider} from 'react-redux';
 import store from './app/lib/store';
-// Create separate contexts for user and API address
-export const APIAddressContext = createContext();
+import { loadSettings } from './app/lib/settingSlice';
 const App = () => {
-  const [apiAddress, setApiAddress] = useState(null);
-  const [perHead, setPerHead] = useState(null);
-  const onAPIAddressChanged = address => {
-    setApiAddress(address);
-  };
-  const onPHeadChanged = head => {
-    setPerHead(head);
-  };
-  const getApiAddress = async () => {
-    try {
-      const address = await AsyncStorage.getItem('apiAddress');
-      const phead = await AsyncStorage.getItem('perHeadCharges');
-      setApiAddress(address);
-      setPerHead(phead);
-    } catch (error) {
-      console.error('Error retrieving API address:', error);
-    }
-  };
-  // Call getApiAddress when the component mounts
-  useEffect(() => {
-    getApiAddress();
-  }, []);
+  useEffect(()=>{
+    store.dispatch(loadSettings());
+  },[]);
   return (
     <Provider store={store}>
-      <APIAddressContext.Provider
-        value={{apiAddress, perHead, onAPIAddressChanged, onPHeadChanged}}>
         <NavigationContainer
           style={{
             flex: 1,
@@ -70,7 +47,6 @@ const App = () => {
             />
           </Stack.Navigator>
         </NavigationContainer>
-      </APIAddressContext.Provider>
     </Provider>
   );
 };

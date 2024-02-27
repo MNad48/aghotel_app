@@ -34,12 +34,19 @@ const Main = ({navigation}) => {
     );
     const fetchData = async () => {
       try {
-        const response = await axios.get(apiAddress);
-        const json = await response.data;
-        setData(json);
-        setFilteredData(json);
+        if(apiAddress) {
+          const response = await axios.get(apiAddress);
+          const json = await response.data;
+          setData(json);
+          setFilteredData(json);
+        } else {
+          ToastAndroid.show("Please set IP address to access api",ToastAndroid.SHORT);
+          navigation.navigate("settings");
+        }
+        //ToastAndroid.showWithGravity(apiAddress,ToastAndroid.SHORT,ToastAndroid.BOTTOM);
       } catch (err) {
         console.log(err);
+        ToastAndroid.show(err.toString(),ToastAndroid.SHORT);
       } finally {
         setLoading(false);
       }
@@ -145,6 +152,7 @@ const Main = ({navigation}) => {
     }
   };
   const handleRefresh = () => {
+    
     setLoading(true);
   };
   return (

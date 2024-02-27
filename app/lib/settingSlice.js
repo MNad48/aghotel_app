@@ -1,8 +1,8 @@
 import {createSlice} from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { ToastAndroid } from 'react-native';
-const API_ADDRESS = "@MyApp:apiAddress";
-const PER_HEAD = "@MyApp:perHeadCharges";
+const API_ADDRESS = "apiAddress";
+const PER_HEAD = "perHeadCharges";
 export const loadSettings = ()=>async dispatch=> {
     try {
         const apiAddress = await AsyncStorage.getItem(API_ADDRESS);
@@ -16,7 +16,7 @@ export const loadSettings = ()=>async dispatch=> {
 }
 
 export const saveSettings = ({apiAddress,perHead})=>async dispatch=> {
-    console.log(apiAddress,perHead);
+    //console.log(apiAddress,perHead);
     try{
         await AsyncStorage.setItem(API_ADDRESS,apiAddress);
         await AsyncStorage.setItem(PER_HEAD,perHead.toString());
