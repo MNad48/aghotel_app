@@ -67,7 +67,7 @@ const Checkout = ({route}) => {
         order_date: order_date,
         auth_id: null,
         table_id: selectedTable,
-        per_heads: perHead,
+        per_heads: perHeads,
         total_phead: totalPerHeads,
         order_status: 'Pending',
         items: OrderItems,
@@ -127,7 +127,7 @@ const Checkout = ({route}) => {
           value={perHeads}
           onChangeText={text => {
             setPerHeads(text);
-            setTotalPerHeads(parseInt(text) * perHead);
+            setTotalPerHeads(parseInt(text) * parseInt(perHead));
           }}
           onBlur={() => {
             Keyboard.dismiss();
